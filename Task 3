@@ -1,0 +1,32 @@
+<?php
+
+function processText($inputText) {
+    //  Пробелы и пунктуация
+    $cleanedText = preg_replace('/[^\p{L}\s]/u', '', $inputText);
+
+    // Розбивка по словам
+    $words = explode(' ', $cleanedText);
+
+    // Маленькие большые буквы
+    $result = '';
+    $isUpper = true; // Начало с капса 
+
+    foreach ($words as $word) {
+        $formattedWord = $isUpper ? ucfirst(mb_strtolower($word)) : mb_strtolower($word);
+        $result .= $formattedWord . ' ';
+        $isUpper = !$isUpper; // Меняю чередование 
+    }
+
+    // Удалить лиший пробел 
+    $result = rtrim($result);
+
+    return $result;
+}
+
+// текст 
+$inputText = "A444Aaaa4a4a4a4a4   A421.";
+$result = processText($inputText);
+
+echo $result;
+
+?>
