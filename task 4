@@ -1,0 +1,39 @@
+<?php
+
+function renameFiles($sourceFolder, $destinationFolder)
+{
+
+    if (!is_dir($sourceFolder)) {
+        die("Помилка: Вихідна папка '$sourceFolder' не існує.");
+    }
+
+
+    if (!file_exists($destinationFolder)) {
+        mkdir($destinationFolder, 0755, true);
+    }
+
+
+    $files = scandir($sourceFolder);
+
+
+    foreach ($files as $file) {
+        if ($file != '.' && $file != '..') {
+            $sourceFilePath = $sourceFolder . '/' . $file;
+            $destinationFilePath = $destinationFolder . '/' . $file;
+
+
+            if (copy($sourceFilePath, $destinationFilePath)) {
+                echo "Файл '$file' скопійовано в '$destinationFolder'.<br>";
+            } else {
+                echo "Помилка копіювання файлу '$file'.<br>";
+            }
+        }
+    }
+
+    echo "Операція завершена.";
+}
+
+
+renameFiles('files', 'files_new');
+
+?>
