@@ -1,0 +1,82 @@
+<?php
+$uploadDir = 'uploads/';
+$imageDir = $uploadDir . 'images/';
+$docDir = $uploadDir . 'docs/';
+
+// Створюємо папки, якщо вони не існують
+if (!file_exists($uploadDir)) {
+    mkdir($uploadDir, 0777, true);
+}
+if (!file_exists($imageDir)) {
+    mkdir($imageDir, 0777, true);
+}
+if (!file_exists($docDir)) {
+    mkdir($docDir, 0777, true);
+}
+
+// Функція для додавання дати та часу до імені файлу
+function generateFileName($filename) {
+    $date = date('Y-m-d_H-i-s');
+    $ext = pathinfo($filename, PATHINFO_EXTENSION);
+    return 'file_' . $date . '.' . $ext;
+}
+
+// Обробка завантаження файлів
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['uploadedFile'])) {
+    $targetDir = ($_POST['file_type'] === 'image') ? $imageDir : $docDir;
+    $targetFile = $targetDir . generateFileName($_FILES['uploadedFile']['name']);
+
+    if (move_uploaded_file($_FILES['uploadedFile']['tmp_name'], $targetFile)) {
+        echo "Файл завантажено успішно.";
+    } else {
+        echo "Помилка завантаження файлу.";
+    }
+}
+
+// Видалення файлу
+if (isset($_GET['file'])) {
+    $file = $_GET['file'];
+    if (file_exists($file)) {
+        unlink($file);
+        echo "Файл видалено успішно.";
+    } else {
+        echo "Помилка видалення файлу.";
+    }
+}
+
+// Функція для виведення списку файлів
+function listFiles($dir) {
+    $files = array_diff(scandir($dir), array('.', '..'));
+    foreach ($files as $file) {
+        echo "<a href='$dir$file'>$file</a> | ";
+        echo "<a href='index.php?file=$dir$file&file_type=" . (strpos($dir, 'images') !== false ? 'image' : 'doc') . "'>Видалити</a><br>";
+    }
+}
+
+// HTML форма для завантаження файлів
+?>
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Завантаження файлів</title>
+</head>
+<body>
+    <h2>Завантаження файлів</h2>
+    <form method="post" enctype="multipart/form-data">
+        <input type="file" name="uploadedFile" />
+        <label>Тип файлу:</label>
+        <select name="file_type">
+            <option value="image">Картинка</option>
+            <option value="doc">Документ</option>
+        </select>
+        <input type="submit" name="uploadBtn" value="Завантажити" />
+    </form>
+    
+    <h2>Список файлів:</h2>
+    <h3>Картинки (images):</h3>
+    <?php listFiles($imageDir); ?>
+    
+    <h3>Документи (docs):</h3>
+    <?php listFiles($docDir); ?>
+</body>
+</html>
